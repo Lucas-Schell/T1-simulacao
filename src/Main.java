@@ -10,7 +10,7 @@ public class Main {
     private static int randomCount = 0;
 
     public static void main(String[] args) {
-        int servers = 4;
+        int servers = 1;
         int capacity = args.length > 1 ? -1 : 5;
         int[] arrival = {2, 4};
         int[] exit = {3, 5};
@@ -22,7 +22,7 @@ public class Main {
         LinkedList<double[]> events = new LinkedList<>();
         events.add(new double[]{0, 2.0});
 
-        x = 49541;
+        x = 59541;
 
         while (randomCount <= 100000) {
             if (servers > 0 && queueSize > 0) {
@@ -54,12 +54,12 @@ public class Main {
             }
 
             if (events.get(min)[0] == 0.0) {
+                timeCount[queueSize] += events.get(min)[1] - time;
+                time = events.get(min)[1];
                 if (queueSize >= capacity) {
                     loss++;
                 } else {
-                    timeCount[queueSize] += events.get(min)[1] - time;
                     queueSize++;
-                    time = events.get(min)[1];
                 }
             } else {
                 if (queueSize > 0) {
