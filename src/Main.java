@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Main {
@@ -14,15 +13,16 @@ public class Main {
         int capacity = args.length > 1 ? -1 : 5;
         int[] arrival = {2, 4};
         int[] exit = {3, 5};
-        int loss = 0;
+        x = 59541;
 
+        double[] timeCount = new double[capacity == -1 ? 1000000 : capacity + 1];
+
+        int loss = 0;
         int queueSize = 0;
         double time = 0;
-        double[] timeCount = new double[capacity == -1 ? 1000000 : capacity + 1];
+
         LinkedList<double[]> events = new LinkedList<>();
         events.add(new double[]{0, 2.0});
-
-        x = 59541;
 
         while (randomCount <= 100000) {
             if (servers > 0 && queueSize > 0) {
@@ -73,11 +73,11 @@ public class Main {
 
         }
 
-        for (double event : timeCount) {
-            System.out.println(event);
+        for (int i = 0; i < timeCount.length; i++) {
+            System.out.println(i + " " + timeCount[i]);
         }
-        System.out.println("Loss: " + loss);
-        System.out.println("Time: " + time);
+        System.out.println("\nLoss: " + loss);
+        System.out.println("Total time: " + time);
     }
 
     public static double nextRandom(int A, int B) {
