@@ -61,16 +61,16 @@ public class Main {
                 } else {
                     queueSize++;
                 }
+                events.remove(min);
             } else {
                 if (queueSize > 0) {
                     timeCount[queueSize] += events.get(min)[1] - time;
                     queueSize--;
                     servers++;
                     time = events.get(min)[1];
+                    events.remove(min);
                 }
             }
-            events.remove(min);
-
         }
 
         for (int i = 0; i < timeCount.length; i++) {
