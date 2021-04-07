@@ -28,7 +28,6 @@ public class Main {
             servers = totalServers;
             LinkedList<double[]> events = new LinkedList<>();
             events.add(new double[]{0, 3.0});
-            System.out.println(Arrays.toString(events.get(0)));
 
             while (randomCount <= 100000) {
                 if (servers > 0 && queueSize > totalServers - servers) {
