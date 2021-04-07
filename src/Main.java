@@ -9,7 +9,7 @@ public class Main {
     private static int randomCount = 0;
 
     public static void main(String[] args) {
-        int servers = 4;
+        int servers = 1;
         int totalServers = servers;
         int capacity = args.length > 1 ? -1 : 5;
         int[] arrival = {2, 4};
