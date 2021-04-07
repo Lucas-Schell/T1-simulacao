@@ -9,7 +9,8 @@ public class Main {
     private static int randomCount = 0;
 
     public static void main(String[] args) {
-        int servers = 1;
+        int servers = 4;
+        int totalServers = servers;
         int capacity = args.length > 1 ? -1 : 5;
         int[] arrival = {2, 4};
         int[] exit = {3, 5};
@@ -25,7 +26,7 @@ public class Main {
         events.add(new double[]{0, 3.0});
 
         while (randomCount <= 100000) {
-            if (servers > 0 && queueSize > 0) {
+            if (servers > 0 && queueSize > totalServers - servers) {
                 double aux = nextRandom(exit[0], exit[1]);
                 randomCount++;
                 servers--;
