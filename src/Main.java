@@ -22,7 +22,7 @@ public class Main {
         double time = 0;
 
         LinkedList<double[]> events = new LinkedList<>();
-        events.add(new double[]{0, 2.0});
+        events.add(new double[]{0, 3.0});
 
         while (randomCount <= 100000) {
             if (servers > 0 && queueSize > 0) {
@@ -74,7 +74,7 @@ public class Main {
         }
 
         for (int i = 0; i < timeCount.length; i++) {
-            System.out.println(i + " " + timeCount[i]);
+            System.out.printf("%d\t%.4f\t%.2f%%\n", i, timeCount[i], ((timeCount[i] * 100) / time));
         }
         System.out.println("\nLoss: " + loss);
         System.out.println("Total time: " + time);
