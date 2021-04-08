@@ -1,4 +1,3 @@
-import java.util.Arrays;
 import java.util.LinkedList;
 
 public class Main {
@@ -9,7 +8,7 @@ public class Main {
     private static double x;
 
     public static void main(String[] args) {
-        sim(1, 5, new int[]{2, 4}, new int[]{3, 5});
+        sim(2, 5, new int[]{2, 4}, new int[]{3, 5});
     }
 
     public static void sim(int servers, int capacity, int[] arrival, int[] exit) {
@@ -17,7 +16,7 @@ public class Main {
         int rowSize = capacity == -1 ? 1000000 : capacity + 1;
 
         double[] result = new double[rowSize + 2];
-        double[] seeds = {1, 2, 3, 4, 5};
+        double[] seeds = {1345, 5423, 7863, 4423, 10587};
         for (int a = 0; a < 5; a++) {
             x = seeds[a];
             double[] timeCount = new double[rowSize];
