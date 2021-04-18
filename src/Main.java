@@ -1,3 +1,4 @@
+//Lucas Schell e Max Franke
 import java.util.LinkedList;
 
 public class Main {
@@ -8,7 +9,9 @@ public class Main {
     private static double x;
 
     public static void main(String[] args) {
-        sim(2, 5, new int[]{2, 4}, new int[]{3, 5});
+        int servers = 2;
+        int capacity = 5;
+        sim(servers, capacity, new int[]{2, 4}, new int[]{3, 5});
     }
 
     public static void sim(int servers, int capacity, int[] arrival, int[] exit) {
