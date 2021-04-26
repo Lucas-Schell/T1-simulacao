@@ -1,4 +1,5 @@
 //Lucas Schell e Max Franke
+
 import java.util.LinkedList;
 
 public class Main {
@@ -15,7 +16,6 @@ public class Main {
     }
 
     public static void sim(int servers, int capacity, int[] arrival, int[] exit) {
-        int totalServers = servers;
         int rowSize = capacity == -1 ? 1000000 : capacity + 1;
 
         double[] result = new double[rowSize + 2];
@@ -27,56 +27,52 @@ public class Main {
             int queueSize = 0;
             int randomCount = 0;
             double time = 0;
-            servers = totalServers;
-            LinkedList<double[]> events = new LinkedList<>();
-            events.add(new double[]{0, 3.0});
+            LinkedList<Object[]> events = new LinkedList<>();
+            events.add(new Object[]{"A0", 3.0});
 
             while (randomCount <= 100000) {
-                if (servers > 0 && queueSize > totalServers - servers) {
-                    double aux = nextRandom(exit[0], exit[1]);
-                    randomCount++;
-                    servers--;
-                    events.add(new double[]{1, aux + time});
-                }
-
-                boolean arriving = false;
-                for (double[] event : events) {
-                    if (event[0] == 0) {
-                        arriving = true;
-                        break;
-                    }
-                }
-
-                if (!arriving) {
-                    double aux = nextRandom(arrival[0], arrival[1]);
-                    randomCount++;
-                    events.add(new double[]{0, aux + time});
-                }
-
                 int min = 0;
                 for (int i = 0; i < events.size(); i++) {
-                    if (events.get(i)[1] < events.get(min)[1]) {
+                    if ((double) events.get(i)[1] < (double) events.get(min)[1]) {
                         min = i;
                     }
                 }
 
-                if (events.get(min)[0] == 0.0) {
-                    timeCount[queueSize] += events.get(min)[1] - time;
-                    time = events.get(min)[1];
-                    if (queueSize >= capacity) {
-                        loss++;
-                    } else {
-                        queueSize++;
-                    }
-                    events.remove(min);
-                } else {
-                    if (queueSize > 0) {
-                        timeCount[queueSize] += events.get(min)[1] - time;
-                        queueSize--;
-                        servers++;
-                        time = events.get(min)[1];
+                switch (events.get(min)[0].toString().charAt(0)) {
+                    case 'A':
+                        timeCount[queueSize] += (double) events.get(min)[1] - time;
+                        time = (double) events.get(min)[1];
+                        if (queueSize >= capacity) {
+                            loss++;
+                        } else {
+                            queueSize++;
+                        }
                         events.remove(min);
-                    }
+
+                        events.add(new Object[]{"A0", nextRandom(arrival[0], arrival[1]) + time});
+                        randomCount++;
+
+                        if (queueSize <= servers) {
+                            events.add(new Object[]{"E0", nextRandom(exit[0], exit[1]) + time});
+                            randomCount++;
+                        }
+                        break;
+                    case 'E':
+                        timeCount[queueSize] += (double) events.get(min)[1] - time;
+                        queueSize--;
+                        time = (double) events.get(min)[1];
+                        events.remove(min);
+
+                        if (queueSize >= servers) {
+                            events.add(new Object[]{"E0", nextRandom(exit[0], exit[1]) + time});
+                            randomCount++;
+                        }
+                        break;
+                    case 'M':
+                        System.out.println('M');
+                        break;
+                    default:
+                        break;
                 }
             }
 
