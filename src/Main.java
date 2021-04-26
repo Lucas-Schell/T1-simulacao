@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) {
         int servers = 2;
-        int capacity = 5;
+        int capacity = 3;
         sim(servers, capacity, new int[]{2, 3}, new int[]{3, 5});
     }
 
@@ -62,7 +62,7 @@ public class Main {
                         break;
                     case "E":
                         int exitQueue = Integer.parseInt(event[1]);
-                        timeCount[queueSize[exitQueue]] += (double) events.get(min)[1] - time;
+                        timeCount[queueSize[0]] += (double) events.get(min)[1] - time;
                         queueSize[exitQueue]--;
                         time = (double) events.get(min)[1];
 
@@ -76,6 +76,8 @@ public class Main {
                         int out = Integer.parseInt(event[1]);
                         int in = Integer.parseInt(event[2]);
                         //todo tempo
+                        timeCount[queueSize[0]] += (double) events.get(min)[1] - time;
+                        time = (double) events.get(min)[1];
 
                         queueSize[out]--;
                         if (queueSize[out] >= 2) { //todo
