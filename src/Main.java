@@ -19,12 +19,12 @@ public class Main {
     public static void sim(int servers, int capacity, int[] arrival, int[] exit) {
         int rowSize = capacity == -1 ? 1000000 : capacity + 1;
 
-        double[] result = new double[rowSize + 2];
+        double[][] result = new double[2][rowSize + 2];
         double[] seeds = {1345, 5423, 7863, 4423, 10587};
         for (int a = 0; a < 5; a++) {
             x = seeds[a];
-            double[] timeCount = new double[rowSize];
-            int loss = 0;
+            double[][] timeCount = new double[2][rowSize]; //todo
+            int[] loss = {0,0};
             int[] queueSize = {0, 0};
             int randomCount = 0;
             double time = 0;
@@ -42,11 +42,13 @@ public class Main {
                 String[] event = events.get(min)[0].toString().split("-");
                 switch (event[0]) {
                     case "A":
+                        for (int i = 0; i < timeCount.length; i++) {
+                            timeCount[i][queueSize[i]] += (double) events.get(min)[1] - time;
+                        }
                         int arrivalQueue = Integer.parseInt(event[1]);
-                        timeCount[queueSize[0]] += (double) events.get(min)[1] - time;
                         time = (double) events.get(min)[1];
                         if (queueSize[arrivalQueue] >= capacity) {
-                            loss++;
+                            loss[0]++; //todo
                         } else {
                             queueSize[arrivalQueue]++;
                             if (queueSize[arrivalQueue] <= servers) {
@@ -61,8 +63,10 @@ public class Main {
                         events.remove(min);
                         break;
                     case "E":
+                        for (int i = 0; i < timeCount.length; i++) {
+                            timeCount[i][queueSize[i]] += (double) events.get(min)[1] - time;
+                        }
                         int exitQueue = Integer.parseInt(event[1]);
-                        timeCount[queueSize[0]] += (double) events.get(min)[1] - time;
                         queueSize[exitQueue]--;
                         time = (double) events.get(min)[1];
 
@@ -73,10 +77,11 @@ public class Main {
                         events.remove(min);
                         break;
                     case "M":
+                        for (int i = 0; i < timeCount.length; i++) {
+                            timeCount[i][queueSize[i]] += (double) events.get(min)[1] - time;
+                        }
                         int out = Integer.parseInt(event[1]);
                         int in = Integer.parseInt(event[2]);
-                        //todo tempo
-                        timeCount[queueSize[0]] += (double) events.get(min)[1] - time;
                         time = (double) events.get(min)[1];
 
                         queueSize[out]--;
@@ -85,7 +90,7 @@ public class Main {
                             randomCount++;
                         }
                         if (queueSize[in] >= 3) { //todo
-                            loss++;
+                            loss[1]++; //todo
                         } else {
                             queueSize[in]++;
                             if (queueSize[in] <= 1) { //todo
@@ -100,13 +105,21 @@ public class Main {
                 }
             }
 
-            for (int i = 0; i < timeCount.length; i++) {
-                result[i] += timeCount[i];
+            for (int i = 0; i < timeCount[0].length; i++) { //todo
+                result[0][i] += timeCount[0][i];
+                result[1][i] += timeCount[1][i];
             }
-            result[result.length - 2] += time;
-            result[result.length - 1] += loss;
+            result[0][result[0].length - 2] += time;
+            result[1][result[1].length - 2] += time;
+            result[0][result[0].length - 1] += loss[0];
+            result[1][result[1].length - 1] += loss[1];
         }
 
+        printRes(result[0], rowSize);
+        printRes(result[1], rowSize);
+    }
+
+    public static void printRes(double[] result, int rowSize) {
         for (int i = 0; i < rowSize; i++) {
             result[i] = result[i] / 5;
         }
