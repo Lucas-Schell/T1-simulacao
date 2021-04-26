@@ -1,5 +1,6 @@
 //Lucas Schell e Max Franke
 
+import java.nio.IntBuffer;
 import java.util.LinkedList;
 
 public class Main {
@@ -12,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         int servers = 2;
         int capacity = 5;
-        sim(servers, capacity, new int[]{2, 4}, new int[]{3, 5});
+        sim(servers, capacity, new int[]{2, 3}, new int[]{3, 5});
     }
 
     public static void sim(int servers, int capacity, int[] arrival, int[] exit) {
@@ -24,11 +25,11 @@ public class Main {
             x = seeds[a];
             double[] timeCount = new double[rowSize];
             int loss = 0;
-            int queueSize = 0;
+            int[] queueSize = {0, 0};
             int randomCount = 0;
             double time = 0;
             LinkedList<Object[]> events = new LinkedList<>();
-            events.add(new Object[]{"A0", 3.0});
+            events.add(new Object[]{"A-0", 2.5});
 
             while (randomCount <= 100000) {
                 int min = 0;
@@ -38,38 +39,59 @@ public class Main {
                     }
                 }
 
-                switch (events.get(min)[0].toString().charAt(0)) {
-                    case 'A':
-                        timeCount[queueSize] += (double) events.get(min)[1] - time;
+                String[] event = events.get(min)[0].toString().split("-");
+                switch (event[0]) {
+                    case "A":
+                        int arrivalQueue = Integer.parseInt(event[1]);
+                        timeCount[queueSize[0]] += (double) events.get(min)[1] - time;
                         time = (double) events.get(min)[1];
-                        if (queueSize >= capacity) {
+                        if (queueSize[arrivalQueue] >= capacity) {
                             loss++;
                         } else {
-                            queueSize++;
+                            queueSize[arrivalQueue]++;
+                            if (queueSize[arrivalQueue] <= servers) {
+                                events.add(new Object[]{"M-" + arrivalQueue + "-" + (arrivalQueue + 1), nextRandom(2, 5) + time}); //todo
+                                randomCount++;
+                            }
                         }
-                        events.remove(min);
 
-                        events.add(new Object[]{"A0", nextRandom(arrival[0], arrival[1]) + time});
+                        events.add(new Object[]{"A-" + arrivalQueue, nextRandom(arrival[0], arrival[1]) + time});
                         randomCount++;
 
-                        if (queueSize <= servers) {
-                            events.add(new Object[]{"E0", nextRandom(exit[0], exit[1]) + time});
-                            randomCount++;
-                        }
-                        break;
-                    case 'E':
-                        timeCount[queueSize] += (double) events.get(min)[1] - time;
-                        queueSize--;
-                        time = (double) events.get(min)[1];
                         events.remove(min);
+                        break;
+                    case "E":
+                        int exitQueue = Integer.parseInt(event[1]);
+                        timeCount[queueSize[exitQueue]] += (double) events.get(min)[1] - time;
+                        queueSize[exitQueue]--;
+                        time = (double) events.get(min)[1];
 
-                        if (queueSize >= servers) {
-                            events.add(new Object[]{"E0", nextRandom(exit[0], exit[1]) + time});
+                        if (queueSize[exitQueue] >= 1) { //todo
+                            events.add(new Object[]{"E-1", nextRandom(exit[0], exit[1]) + time}); //todo
                             randomCount++;
                         }
+                        events.remove(min);
                         break;
-                    case 'M':
-                        System.out.println('M');
+                    case "M":
+                        int out = Integer.parseInt(event[1]);
+                        int in = Integer.parseInt(event[2]);
+                        //todo tempo
+
+                        queueSize[out]--;
+                        if (queueSize[out] >= 2) { //todo
+                            events.add(new Object[]{"M-" + out + "-" + in, nextRandom(2, 5) + time}); //todo
+                            randomCount++;
+                        }
+                        if (queueSize[in] >= 3) { //todo
+                            loss++;
+                        } else {
+                            queueSize[in]++;
+                            if (queueSize[in] <= 1) { //todo
+                                events.add(new Object[]{"E-1", nextRandom(exit[0], exit[1]) + time}); //todo
+                                randomCount++;
+                            }
+                        }
+                        events.remove(min);
                         break;
                     default:
                         break;
