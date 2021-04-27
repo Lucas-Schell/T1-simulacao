@@ -1,6 +1,5 @@
 //Lucas Schell e Max Franke
 
-import java.nio.IntBuffer;
 import java.util.LinkedList;
 
 public class Main {
@@ -13,19 +12,19 @@ public class Main {
     public static void main(String[] args) {
         int servers = 2;
         int capacity = 3;
-        sim(servers, capacity, new int[]{2, 3}, new int[]{3, 5});
+        sim(servers, capacity, new int[]{2, 3}, new int[]{3, 5}, 2, 3, 1, new int[]{2, 5});
     }
 
-    public static void sim(int servers, int capacity, int[] arrival, int[] exit) {
-        int rowSize = capacity == -1 ? 1000000 : capacity + 1;
-
-        double[][] result = new double[2][rowSize + 2];
+    public static void sim(int server, int capacity, int[] arrival, int[] exit, int queueCount, int capacity2, int server2, int[] move) {
+        int[] rowSize = new int[]{capacity + 1, capacity2 + 1}; //todo
+        int[] servers = new int[]{server, server2}; //todo
+        double[][] result = new double[queueCount][rowSize[0] + 2]; //todo
         double[] seeds = {1345, 5423, 7863, 4423, 10587};
         for (int a = 0; a < 5; a++) {
             x = seeds[a];
-            double[][] timeCount = new double[2][rowSize]; //todo
-            int[] loss = {0,0};
-            int[] queueSize = {0, 0};
+            double[][] timeCount = new double[queueCount][rowSize[0]]; //todo
+            int[] loss = new int[queueCount];
+            int[] queueSize = new int[queueCount];
             int randomCount = 0;
             double time = 0;
             LinkedList<Object[]> events = new LinkedList<>();
@@ -47,12 +46,12 @@ public class Main {
                         }
                         int arrivalQueue = Integer.parseInt(event[1]);
                         time = (double) events.get(min)[1];
-                        if (queueSize[arrivalQueue] >= capacity) {
-                            loss[0]++; //todo
+                        if (queueSize[arrivalQueue] >= rowSize[arrivalQueue] - 1) {
+                            loss[arrivalQueue]++;
                         } else {
                             queueSize[arrivalQueue]++;
-                            if (queueSize[arrivalQueue] <= servers) {
-                                events.add(new Object[]{"M-" + arrivalQueue + "-" + (arrivalQueue + 1), nextRandom(2, 5) + time}); //todo
+                            if (queueSize[arrivalQueue] <= servers[arrivalQueue]) {
+                                events.add(new Object[]{"M-" + arrivalQueue + "-" + (arrivalQueue + 1), nextRandom(move[0], move[1]) + time});
                                 randomCount++;
                             }
                         }
@@ -70,8 +69,8 @@ public class Main {
                         queueSize[exitQueue]--;
                         time = (double) events.get(min)[1];
 
-                        if (queueSize[exitQueue] >= 1) { //todo
-                            events.add(new Object[]{"E-1", nextRandom(exit[0], exit[1]) + time}); //todo
+                        if (queueSize[exitQueue] >= servers[exitQueue]) {
+                            events.add(new Object[]{"E-" + exitQueue, nextRandom(exit[0], exit[1]) + time});
                             randomCount++;
                         }
                         events.remove(min);
@@ -85,16 +84,16 @@ public class Main {
                         time = (double) events.get(min)[1];
 
                         queueSize[out]--;
-                        if (queueSize[out] >= 2) { //todo
-                            events.add(new Object[]{"M-" + out + "-" + in, nextRandom(2, 5) + time}); //todo
+                        if (queueSize[out] >= servers[out]) {
+                            events.add(new Object[]{"M-" + out + "-" + in, nextRandom(move[0], move[1]) + time});
                             randomCount++;
                         }
-                        if (queueSize[in] >= 3) { //todo
-                            loss[1]++; //todo
+                        if (queueSize[in] >= rowSize[in] - 1) {
+                            loss[in]++;
                         } else {
                             queueSize[in]++;
-                            if (queueSize[in] <= 1) { //todo
-                                events.add(new Object[]{"E-1", nextRandom(exit[0], exit[1]) + time}); //todo
+                            if (queueSize[in] <= servers[in]) {
+                                events.add(new Object[]{"E-" + in, nextRandom(exit[0], exit[1]) + time});
                                 randomCount++;
                             }
                         }
@@ -105,18 +104,18 @@ public class Main {
                 }
             }
 
-            for (int i = 0; i < timeCount[0].length; i++) { //todo
-                result[0][i] += timeCount[0][i];
-                result[1][i] += timeCount[1][i];
+            for (int i = 0; i < timeCount.length; i++) {
+                for (int j = 0; j < timeCount[0].length; j++) {
+                    result[i][j] += timeCount[i][j];
+                }
+                result[i][result[i].length - 2] += time;
+                result[i][result[i].length - 1] += loss[i];
             }
-            result[0][result[0].length - 2] += time;
-            result[1][result[1].length - 2] += time;
-            result[0][result[0].length - 1] += loss[0];
-            result[1][result[1].length - 1] += loss[1];
         }
 
-        printRes(result[0], rowSize);
-        printRes(result[1], rowSize);
+        for (int i = 0; i < rowSize.length; i++) {
+            printRes(result[i], rowSize[i]);
+        }
     }
 
     public static void printRes(double[] result, int rowSize) {
