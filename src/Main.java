@@ -1,6 +1,7 @@
 //Lucas Schell e Max Franke
 
-import java.util.LinkedList;
+import java.util.Comparator;
+import java.util.PriorityQueue;
 
 public class Main {
 
@@ -23,8 +24,10 @@ public class Main {
             rowSize[i] = queues[i][1] + 1;
             servers[i] = queues[i][0];
         }
+
         double[][] result = new double[queues.length][rowSize[0] + 2];
         double[] seeds = {1345, 5423, 7863, 4423, 10587};
+
         for (int a = 0; a < 5; a++) {
             x = seeds[a];
             double[][] timeCount = new double[queues.length][rowSize[0]];
@@ -32,25 +35,32 @@ public class Main {
             int[] queueSize = new int[queues.length];
             int randomCount = 0;
             double time = 0;
-            LinkedList<Object[]> events = new LinkedList<>();
+
+            Comparator<Object[]> stringLengthComparator = (s1, s2) -> {
+                double aux = (double) s1[1] - (double) s2[1];
+                if (aux < 0) return -1;
+                if (aux > 0) return 1;
+                return 0;
+            };
+            PriorityQueue<Object[]> events = new PriorityQueue<>(stringLengthComparator);
             events.add(new Object[]{"A-0", 2.5});
 
             while (randomCount <= 100000) {
-                int min = 0;
-                for (int i = 0; i < events.size(); i++) {
-                    if ((double) events.get(i)[1] < (double) events.get(min)[1]) {
-                        min = i;
-                    }
-                }
+                Object[] event = events.poll();
 
-                String[] event = events.get(min)[0].toString().split("-");
-                switch (event[0]) {
+                assert event != null;
+                String[] eventType = event[0].toString().split("-");
+                double eventTime = (double) event[1];
+
+                switch (eventType[0]) {
                     case "A":
                         for (int i = 0; i < timeCount.length; i++) {
-                            timeCount[i][queueSize[i]] += (double) events.get(min)[1] - time;
+                            timeCount[i][queueSize[i]] += eventTime - time;
                         }
-                        int arrivalQueue = Integer.parseInt(event[1]);
-                        time = (double) events.get(min)[1];
+
+                        int arrivalQueue = Integer.parseInt(eventType[1]);
+                        time = eventTime;
+
                         if (queueSize[arrivalQueue] >= rowSize[arrivalQueue] - 1) {
                             loss[arrivalQueue]++;
                         } else {
@@ -64,36 +74,36 @@ public class Main {
 
                         events.add(new Object[]{"A-" + arrivalQueue, nextRandom(queues[arrivalQueue][2], queues[arrivalQueue][3]) + time});
                         randomCount++;
-
-                        events.remove(min);
                         break;
                     case "E":
                         for (int i = 0; i < timeCount.length; i++) {
-                            timeCount[i][queueSize[i]] += (double) events.get(min)[1] - time;
+                            timeCount[i][queueSize[i]] += eventTime - time;
                         }
-                        int exitQueue = Integer.parseInt(event[1]);
+
+                        int exitQueue = Integer.parseInt(eventType[1]);
+                        time = eventTime;
                         queueSize[exitQueue]--;
-                        time = (double) events.get(min)[1];
 
                         if (queueSize[exitQueue] >= servers[exitQueue]) {
                             events.add(new Object[]{"E-" + exitQueue, nextRandom(queues[exitQueue][4], queues[exitQueue][5]) + time});
                             randomCount++;
                         }
-                        events.remove(min);
                         break;
                     case "M":
                         for (int i = 0; i < timeCount.length; i++) {
-                            timeCount[i][queueSize[i]] += (double) events.get(min)[1] - time;
+                            timeCount[i][queueSize[i]] += eventTime - time;
                         }
-                        int out = Integer.parseInt(event[1]);
-                        int in = Integer.parseInt(event[2]);
-                        time = (double) events.get(min)[1];
 
+                        int out = Integer.parseInt(eventType[1]);
+                        int in = Integer.parseInt(eventType[2]);
+                        time = eventTime;
                         queueSize[out]--;
+
                         if (queueSize[out] >= servers[out]) {
                             events.add(new Object[]{"M-" + out + "-" + in, nextRandom(queues[out][4], queues[out][5]) + time});
                             randomCount++;
                         }
+
                         if (queueSize[in] >= rowSize[in] - 1) {
                             loss[in]++;
                         } else {
@@ -103,7 +113,6 @@ public class Main {
                                 randomCount++;
                             }
                         }
-                        events.remove(min);
                         break;
                     default:
                         break;
