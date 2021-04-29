@@ -12,7 +12,7 @@ public class Main {
 
     public static void main(String[] args) {
         int[][] queues = new int[2][];
-        queues[0] = new int[]{2, 3, 2, 3, 2, 5}; //servers, capacity, arrivalMin, arrivalMax, exitMin, ExitMax
+        queues[0] = new int[]{2, 3, 2, 3, 2, 5}; //servers, capacity, arrivalMin, arrivalMax, exitMin, exitMax
         queues[1] = new int[]{1, 3, -1, -1, 3, 5};
         sim(queues);
     }
@@ -36,13 +36,13 @@ public class Main {
             int randomCount = 0;
             double time = 0;
 
-            Comparator<Object[]> stringLengthComparator = (s1, s2) -> {
+            Comparator<Object[]> comparator = (s1, s2) -> {
                 double aux = (double) s1[1] - (double) s2[1];
                 if (aux < 0) return -1;
                 if (aux > 0) return 1;
                 return 0;
             };
-            PriorityQueue<Object[]> events = new PriorityQueue<>(stringLengthComparator);
+            PriorityQueue<Object[]> events = new PriorityQueue<>(comparator);
             events.add(new Object[]{"A-0", 2.5});
 
             while (randomCount <= 100000) {
