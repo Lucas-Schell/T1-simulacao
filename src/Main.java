@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) {
         int[][] queues = new int[2][];
         queues[0] = new int[]{2, 3, 2, 3, 2, 5}; //servers, capacity, arrivalMin, arrivalMax, exitMin, exitMax
-        queues[1] = new int[]{1, 3, -1, -1, 3, 5};
+        queues[1] = new int[]{1, -1, -1, -1, 3, 5};
         sim(queues);
     }
 
