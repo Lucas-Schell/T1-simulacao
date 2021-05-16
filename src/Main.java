@@ -12,16 +12,17 @@ public class Main {
     private static int randomCount, maxRand;
 
     public static void main(String[] args) {
-        Queue q0 = new Queue(1, -1, 1, 4, 1, 1.5, new double[][]{{0.8, 0.2}, {1, 2}});
-        Queue q1 = new Queue(3, 5, 0, 0, 5, 10, new double[][]{{0.3, 0.5}, {0, 2}});
-        Queue q2 = new Queue(2, 8, 0, 0, 10, 20, new double[][]{{0.7}, {1}});
-        Queue[] queues = {q0, q1, q2};
+        Queue q0 = new Queue("F1", 2, 4, 2, 3, 4, 7, new double[][]{{0.7}, {1}});
+        Queue q1 = new Queue("F2", 1, -1, 0, 0, 4, 8, null);
+        //Queue q2 = new Queue(2, 8, 0, 0, 10, 20, new double[][]{{0.7}, {1}});
+
+        Queue[] queues = {q0, q1};
         sim(queues);
     }
 
     public static void sim(Queue[] queues) {
         double[] seeds = {1345, 5423, 7863, 4423, 10587};
-        maxRand = 100000;
+        maxRand = 16;
 
         for (int a = 0; a < 1; a++) {
             x = seeds[a];
@@ -35,7 +36,7 @@ public class Main {
                 return 0;
             };
             PriorityQueue<Object[]> events = new PriorityQueue<>(comparator);
-            events.add(new Object[]{"A-0", 1.0});
+            events.add(new Object[]{"A-0", 3.0});
 
             simulation:
             while (randomCount < maxRand) {
@@ -143,7 +144,7 @@ public class Main {
     }
 
     public static Object[] generateExitEvent(Queue queue, int queuePos, double time) throws Exception {
-        int dest = -1;
+        int dest = queue.firstRoute();
         if (queue.hasRoutes()) {
             dest = queue.exit(nextRandom(0, 1));
             randomCount++;
@@ -157,10 +158,11 @@ public class Main {
         }
     }
 
-    //static double[] r = {0.2176, 0.0103, 0.1109, 0.3456, 0.9910, 0.2323, 0.9211, 0.0322, 0.1211, 0.5131, 0.7208, 0.9172, 0.9922, 0.8324, 0.5011, 0.2931};
+    static double[] r = {0.2176, 0.0103, 0.1109, 0.3456, 0.9910, 0.2323, 0.9211, 0.0322, 0.1211, 0.5131, 0.7208, 0.9172, 0.9922, 0.8324, 0.5011, 0.2931};
+    //static double[] r = {0.9921, 0.0004, 0.5534, 0.2761, 0.3398, 0.8963, 0.9023, 0.0132, 0.4569, 0.5121, 0.9208, 0.0171, 0.2299, 0.8545, 0.6001, 0.2921};
 
     public static double nextRandom(double A, double B) {
         x = (a * x + c) % m;
-        return (B - A) * (x / m) + A;
+        return (B - A) * (r[randomCount]) + A;
     }
 }

@@ -1,3 +1,4 @@
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class Queue {
@@ -5,10 +6,12 @@ public class Queue {
     private final double arrivalMin, arrivalMax, exitMin, exitMax;
     private int size, loss;
     private double time;
+    private String name;
     private final double[][] routes;
     private final ArrayList<Double> queueTime;
 
-    public Queue(int servers, int capacity, double arrivalMin, double arrivalMax, double exitMin, double exitMax, double[][] routes) {
+    public Queue(String name, int servers, int capacity, double arrivalMin, double arrivalMax, double exitMin, double exitMax, double[][] routes) {
+        this.name = name;
         this.servers = servers;
         this.capacity = capacity;
         this.arrivalMin = arrivalMin;
@@ -26,11 +29,16 @@ public class Queue {
     }
 
     public void print() {
+        System.out.println(name);
         for (int i = 0; i < queueTime.size(); i++) {
             System.out.printf("%d\t%.4f\t%.2f%%\n", i, queueTime.get(i), ((queueTime.get(i) * 100) / time));
         }
-        System.out.println("\nLoss: " + getLoss());
-        System.out.println("Total time: " + getTime());
+        for (int i = queueTime.size(); i < capacity + 1; i++) {
+            System.out.printf("%d\t%.4f\t%.2f%%\n", i, 0.0, 0.0);
+        }
+
+        System.out.println("Loss: " + getLoss());
+        System.out.println("Total time: " + getTime() + "\n");
     }
 
     public void addTime(double time) {
@@ -61,7 +69,11 @@ public class Queue {
     }
 
     public boolean hasRoutes() {
-        return routes[0].length > 0;
+        return routes[0].length > 0 && routes[0][0] < 1.0;
+    }
+
+    public int firstRoute() {
+        return routes[0].length > 0 ? (int) routes[1][0] : -1;
     }
 
     public double[] getArrival() {
