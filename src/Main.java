@@ -9,31 +9,23 @@ public class Main {
     private static final int c = 14168;
     private static final int m = 137921;
     private static double x;
+    private static int randomCount, maxRand;
 
     public static void main(String[] args) {
-        int[][] queues = new int[2][];
-        queues[0] = new int[]{2, 3, 2, 3, 2, 5}; //servers, capacity, arrivalMin, arrivalMax, exitMin, exitMax
-        queues[1] = new int[]{1, -1, -1, -1, 3, 5};
+        Queue q0 = new Queue(1, -1, 1, 4, 1, 1.5, new double[][]{{0.8, 0.2}, {1, 2}});
+        Queue q1 = new Queue(3, 5, 0, 0, 5, 10, new double[][]{{0.3, 0.5}, {0, 2}});
+        Queue q2 = new Queue(2, 8, 0, 0, 10, 20, new double[][]{{0.7}, {1}});
+        Queue[] queues = {q0, q1, q2};
         sim(queues);
     }
 
-    public static void sim(int[][] queues) {
-        int[] rowSize = new int[queues.length];
-        int[] servers = new int[queues.length];
-        for (int i = 0; i < queues.length; i++) {
-            rowSize[i] = queues[i][1] + 1;
-            servers[i] = queues[i][0];
-        }
-
-        double[][] result = new double[queues.length][rowSize[0] + 2];
+    public static void sim(Queue[] queues) {
         double[] seeds = {1345, 5423, 7863, 4423, 10587};
+        maxRand = 100000;
 
-        for (int a = 0; a < 5; a++) {
+        for (int a = 0; a < 1; a++) {
             x = seeds[a];
-            double[][] timeCount = new double[queues.length][rowSize[0]];
-            int[] loss = new int[queues.length];
-            int[] queueSize = new int[queues.length];
-            int randomCount = 0;
+            randomCount = 0;
             double time = 0;
 
             Comparator<Object[]> comparator = (s1, s2) -> {
@@ -43,9 +35,10 @@ public class Main {
                 return 0;
             };
             PriorityQueue<Object[]> events = new PriorityQueue<>(comparator);
-            events.add(new Object[]{"A-0", 2.5});
+            events.add(new Object[]{"A-0", 1.0});
 
-            while (randomCount <= 100000) {
+            simulation:
+            while (randomCount < maxRand) {
                 Object[] event = events.poll();
 
                 assert event != null;
@@ -54,64 +47,87 @@ public class Main {
 
                 switch (eventType[0]) {
                     case "A":
-                        for (int i = 0; i < timeCount.length; i++) {
-                            timeCount[i][queueSize[i]] += eventTime - time;
+                        for (Queue q : queues) {
+                            q.addTime(eventTime - time);
                         }
-
-                        int arrivalQueue = Integer.parseInt(eventType[1]);
                         time = eventTime;
 
-                        if (queueSize[arrivalQueue] >= rowSize[arrivalQueue] - 1) {
-                            loss[arrivalQueue]++;
-                        } else {
-                            queueSize[arrivalQueue]++;
-                            if (queueSize[arrivalQueue] <= servers[arrivalQueue]) {
-                                events.add(new Object[]{"M-" + arrivalQueue + "-" + (arrivalQueue + 1),
-                                        nextRandom(queues[arrivalQueue][4], queues[arrivalQueue][5]) + time});
-                                randomCount++;
-                            }
-                        }
+                        int arrivalPos = Integer.parseInt(eventType[1]);
+                        Queue arrivalQueue = queues[arrivalPos];
 
-                        events.add(new Object[]{"A-" + arrivalQueue, nextRandom(queues[arrivalQueue][2], queues[arrivalQueue][3]) + time});
+                        if (arrivalQueue.getSize() < arrivalQueue.getCapacity()) {
+                            arrivalQueue.addSize(1);
+                            if (arrivalQueue.getSize() <= arrivalQueue.getServers()) {
+                                try {
+                                    events.add(generateExitEvent(arrivalQueue, arrivalPos, time));
+                                } catch (Exception e) {
+                                    break simulation;
+                                }
+                                randomCount++;
+                                if (randomCount == maxRand) break simulation;
+                            }
+                        } else {
+                            arrivalQueue.addLoss();
+                        }
+                        double[] arrival = arrivalQueue.getArrival();
+                        events.add(new Object[]{"A-" + arrivalPos, nextRandom(arrival[0], arrival[1]) + time});
                         randomCount++;
                         break;
                     case "E":
-                        for (int i = 0; i < timeCount.length; i++) {
-                            timeCount[i][queueSize[i]] += eventTime - time;
+                        for (Queue q : queues) {
+                            q.addTime(eventTime - time);
                         }
-
-                        int exitQueue = Integer.parseInt(eventType[1]);
                         time = eventTime;
-                        queueSize[exitQueue]--;
 
-                        if (queueSize[exitQueue] >= servers[exitQueue]) {
-                            events.add(new Object[]{"E-" + exitQueue, nextRandom(queues[exitQueue][4], queues[exitQueue][5]) + time});
+                        int exitPos = Integer.parseInt(eventType[1]);
+                        Queue exitQueue = queues[exitPos];
+
+                        exitQueue.addSize(-1);
+
+                        if (exitQueue.getSize() >= exitQueue.getServers()) {
+                            try {
+                                events.add(generateExitEvent(exitQueue, exitPos, time));
+                            } catch (Exception e) {
+                                break simulation;
+                            }
                             randomCount++;
                         }
                         break;
                     case "M":
-                        for (int i = 0; i < timeCount.length; i++) {
-                            timeCount[i][queueSize[i]] += eventTime - time;
+                        for (Queue q : queues) {
+                            q.addTime(eventTime - time);
                         }
-
-                        int out = Integer.parseInt(eventType[1]);
-                        int in = Integer.parseInt(eventType[2]);
                         time = eventTime;
-                        queueSize[out]--;
 
-                        if (queueSize[out] >= servers[out]) {
-                            events.add(new Object[]{"M-" + out + "-" + in, nextRandom(queues[out][4], queues[out][5]) + time});
+                        int outPos = Integer.parseInt(eventType[1]);
+                        Queue outQueue = queues[outPos];
+                        int inPos = Integer.parseInt(eventType[2]);
+                        Queue inQueue = queues[inPos];
+
+                        outQueue.addSize(-1);
+
+                        if (outQueue.getSize() >= outQueue.getServers()) {
+                            try {
+                                events.add(generateExitEvent(outQueue, outPos, time));
+                            } catch (Exception e) {
+                                break simulation;
+                            }
                             randomCount++;
+                            if (randomCount == maxRand) break simulation;
                         }
 
-                        if (queueSize[in] >= rowSize[in] - 1) {
-                            loss[in]++;
-                        } else {
-                            queueSize[in]++;
-                            if (queueSize[in] <= servers[in]) {
-                                events.add(new Object[]{"E-" + in, nextRandom(queues[in][4], queues[in][5]) + time});
+                        if (inQueue.getSize() < inQueue.getCapacity()) {
+                            inQueue.addSize(1);
+                            if (inQueue.getSize() <= inQueue.getServers()) {
+                                try {
+                                    events.add(generateExitEvent(inQueue, inPos, time));
+                                } catch (Exception e) {
+                                    break simulation;
+                                }
                                 randomCount++;
                             }
+                        } else {
+                            inQueue.addLoss();
                         }
                         break;
                     default:
@@ -119,35 +135,31 @@ public class Main {
                 }
             }
 
-            for (int i = 0; i < timeCount.length; i++) {
-                for (int j = 0; j < timeCount[0].length; j++) {
-                    result[i][j] += timeCount[i][j];
-                }
-                result[i][result[i].length - 2] += time;
-                result[i][result[i].length - 1] += loss[i];
+            for (Queue q : queues) {
+                q.print();
             }
         }
 
-        for (int i = 0; i < rowSize.length; i++) {
-            printRes(result[i], rowSize[i]);
+    }
+
+    public static Object[] generateExitEvent(Queue queue, int queuePos, double time) throws Exception {
+        int dest = -1;
+        if (queue.hasRoutes()) {
+            dest = queue.exit(nextRandom(0, 1));
+            randomCount++;
+            if (randomCount == maxRand) throw new Exception();
+        }
+        double[] exit = queue.getExit();
+        if (dest == -1) {
+            return new Object[]{"E-" + queuePos, nextRandom(exit[0], exit[1]) + time};
+        } else {
+            return new Object[]{"M-" + queuePos + "-" + dest, nextRandom(exit[0], exit[1]) + time};
         }
     }
 
-    public static void printRes(double[] result, int rowSize) {
-        for (int i = 0; i < rowSize; i++) {
-            result[i] = result[i] / 5;
-        }
-        result[result.length - 2] = result[result.length - 2] / 5;
-        result[result.length - 1] = result[result.length - 1] / 5;
+    //static double[] r = {0.2176, 0.0103, 0.1109, 0.3456, 0.9910, 0.2323, 0.9211, 0.0322, 0.1211, 0.5131, 0.7208, 0.9172, 0.9922, 0.8324, 0.5011, 0.2931};
 
-        for (int i = 0; i < rowSize; i++) {
-            System.out.printf("%d\t%.4f\t%.2f%%\n", i, result[i], ((result[i] * 100) / result[result.length - 2]));
-        }
-        System.out.println("\nLoss: " + result[result.length - 1]);
-        System.out.println("Total time: " + result[result.length - 2]);
-    }
-
-    public static double nextRandom(int A, int B) {
+    public static double nextRandom(double A, double B) {
         x = (a * x + c) % m;
         return (B - A) * (x / m) + A;
     }
