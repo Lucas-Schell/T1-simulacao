@@ -14,7 +14,7 @@ public class Main {
     private static final int a = 36789;
     private static final int c = 14168;
     private static final int m = 137921;
-    private static double x;
+    private static long x;
     private static int randomCount, maxRand;
 
     public static void main(String[] args) throws IOException {
@@ -23,16 +23,16 @@ public class Main {
 
         Map<String, Queue> queues = config.generateQueues();
         List<Object[]> arrivals = config.getArrivals();
+        Long[] seeds = config.getSeeds().toArray(new Long[0]);
+        maxRand = config.getRndNumbersPerSeed();
 
-        sim(queues, arrivals);
+        sim(queues, arrivals, seeds);
     }
 
-    public static void sim(Map<String, Queue> queues, List<Object[]> arrivals) {
-        double[] seeds = {1345, 5423, 7863, 4423, 10587};
-        maxRand = 100000;
+    public static void sim(Map<String, Queue> queues, List<Object[]> arrivals, Long[] seeds) {
 
-        for (int a = 0; a < 1; a++) {
-            x = seeds[a];
+        for (Long seed : seeds) {
+            x = seed;
             randomCount = 0;
             double time = 0;
 
@@ -144,10 +144,13 @@ public class Main {
             }
 
             for (Queue q : queues.values()) {
-                q.print();
+                q.addMedia();
             }
         }
 
+        for (Queue q : queues.values()) {
+            q.print();
+        }
     }
 
     public static Object[] generateExitEvent(Queue queue, String queueName, double time) throws Exception {
@@ -170,6 +173,6 @@ public class Main {
 
     public static double nextRandom(double A, double B) {
         x = (a * x + c) % m;
-        return (B - A) * (x / m) + A;
+        return (B - A) * ((double) x / m) + A;
     }
 }

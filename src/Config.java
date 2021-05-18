@@ -4,9 +4,11 @@ import java.util.List;
 import java.util.Map;
 
 public class Config {
-    private Map<String, Double> arrivals = new HashMap<>();
-    private Map<String, Queues> queues = new HashMap<>();
-    private List<Route> routing = new LinkedList<>();
+    public Map<String, Double> arrivals = new HashMap<>();
+    public Map<String, Queues> queues = new HashMap<>();
+    public List<Route> routing = new LinkedList<>();
+    public List<Long> seeds = new LinkedList<>();
+    public int rndNumbersPerSeed = 100000;
 
     public static class Queues {
         public int servers;
@@ -52,15 +54,11 @@ public class Config {
         return list;
     }
 
-    public void setArrivals(Map<String, Double> arrivals) {
-        this.arrivals = arrivals;
+    public List<Long> getSeeds() {
+        return seeds;
     }
 
-    public void setQueues(Map<String, Queues> queues) {
-        this.queues = queues;
-    }
-
-    public void setRouting(List<Route> routes) {
-        this.routing = routes;
+    public int getRndNumbersPerSeed() {
+        return rndNumbersPerSeed;
     }
 }

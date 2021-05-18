@@ -1,6 +1,12 @@
 arrivals:
   F1: 1.0
 
+rndNumbersPerSeed: 100000
+
+seeds:
+  - 1345
+  - 5423
+
 queues:
   F1:
     servers: 1
@@ -21,18 +27,18 @@ queues:
     maxExit: 20.0
 
 routing:
-  -  source: F1
-     target: F2
-     probability: 0.8
-  -  source: F1
-     target: F3
-     probability: 0.2
-  -  source: F2
-     target: F1
-     probability: 0.3
-  -  source: F2
-     target: F3
-     probability: 0.5
-  -  source: F3
-     target: F2
-     probability: 0.7
+  - source: F1
+    target: F2
+    probability: 0.8
+  - source: F1
+    target: F3
+    probability: 0.2
+  - source: F2
+    target: F1
+    probability: 0.3
+  - source: F2
+    target: F3
+    probability: 0.5
+  - source: F3
+    target: F2
+    probability: 0.7

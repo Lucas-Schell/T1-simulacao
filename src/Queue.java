@@ -3,10 +3,10 @@ import java.util.ArrayList;
 public class Queue {
     private final int servers, capacity;
     private final double arrivalMin, arrivalMax, exitMin, exitMax;
+    private final Object[][] routes;
+    private final String name;
     private int size, loss;
     private double time;
-    private final String name;
-    private final Object[][] routes;
     private final ArrayList<Double> queueTime;
 
     public Queue(String name, int servers, int capacity, double arrivalMin, double arrivalMax, double exitMin, double exitMax, Object[][] routes) {
@@ -27,17 +27,23 @@ public class Queue {
         queueTime = new ArrayList<>();
     }
 
+    private int media = 0;
     public void print() {
         System.out.println(name);
         for (int i = 0; i < queueTime.size(); i++) {
-            System.out.printf("%d\t%.4f\t%.2f%%\n", i, queueTime.get(i), ((queueTime.get(i) * 100) / time));
+            System.out.printf("%d\t%.4f\t%.2f%%\n", i, queueTime.get(i) / media, (((queueTime.get(i) / media) * 100) / (time / media)));
         }
         for (int i = queueTime.size(); i < capacity + 1; i++) {
             System.out.printf("%d\t%.4f\t%.2f%%\n", i, 0.0, 0.0);
         }
 
-        System.out.println("Loss: " + getLoss());
-        System.out.println("Total time: " + getTime() + "\n");
+        System.out.println("Loss: " + (getLoss() / media));
+        System.out.println("Total time: " + (getTime() / media) + "\n");
+    }
+
+    public void addMedia(){
+        size = 0;
+        media++;
     }
 
     public void addTime(double time) {
