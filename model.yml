@@ -1,0 +1,38 @@
+arrivals:
+  F1: 1.0
+
+queues:
+  F1:
+    servers: 1
+    capacity: -1
+    minArrival: 1.0
+    maxArrival: 4.0
+    minExit: 1.0
+    maxExit: 1.5
+  F2:
+    servers: 3
+    capacity: 5
+    minExit: 5.0
+    maxExit: 10.0
+  F3:
+    servers: 2
+    capacity: 8
+    minExit: 10.0
+    maxExit: 20.0
+
+routing:
+  -  source: F1
+     target: F2
+     probability: 0.8
+  -  source: F1
+     target: F3
+     probability: 0.2
+  -  source: F2
+     target: F1
+     probability: 0.3
+  -  source: F2
+     target: F3
+     probability: 0.5
+  -  source: F3
+     target: F2
+     probability: 0.7

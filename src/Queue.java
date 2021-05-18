@@ -1,4 +1,3 @@
-import java.sql.SQLOutput;
 import java.util.ArrayList;
 
 public class Queue {
@@ -6,11 +5,11 @@ public class Queue {
     private final double arrivalMin, arrivalMax, exitMin, exitMax;
     private int size, loss;
     private double time;
-    private String name;
-    private final double[][] routes;
+    private final String name;
+    private final Object[][] routes;
     private final ArrayList<Double> queueTime;
 
-    public Queue(String name, int servers, int capacity, double arrivalMin, double arrivalMax, double exitMin, double exitMax, double[][] routes) {
+    public Queue(String name, int servers, int capacity, double arrivalMin, double arrivalMax, double exitMin, double exitMax, Object[][] routes) {
         this.name = name;
         this.servers = servers;
         this.capacity = capacity;
@@ -21,7 +20,7 @@ public class Queue {
         if (routes != null && routes.length == 2 && routes[0].length == routes[1].length) {
             this.routes = routes;
         } else {
-            this.routes = new double[2][0];
+            this.routes = new Object[2][0];
         }
         size = loss = 0;
         time = 0.0;
@@ -49,15 +48,15 @@ public class Queue {
         this.time += time;
     }
 
-    public int exit(double route) {
+    public String exit(double route) {
         double count = 0.0;
         for (int i = 0; i < routes[0].length; i++) {
-            count += routes[0][i];
+            count += (double) routes[0][i];
             if (route < count) {
-                return (int) routes[1][i];
+                return (String) routes[1][i];
             }
         }
-        return -1;
+        return "exit";
     }
 
     public void addSize(int add) {
@@ -69,11 +68,11 @@ public class Queue {
     }
 
     public boolean hasRoutes() {
-        return routes[0].length > 0 && routes[0][0] < 1.0;
+        return routes[0].length > 0 && (double) routes[0][0] < 1.0;
     }
 
-    public int firstRoute() {
-        return routes[0].length > 0 ? (int) routes[1][0] : -1;
+    public String firstRoute() {
+        return routes[0].length > 0 ? (String) routes[1][0] : "exit";
     }
 
     public double[] getArrival() {

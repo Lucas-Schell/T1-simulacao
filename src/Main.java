@@ -1,7 +1,13 @@
 //Lucas Schell e Max Franke
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class Main {
 
@@ -11,15 +17,17 @@ public class Main {
     private static double x;
     private static int randomCount, maxRand;
 
-    public static void main(String[] args) {
-        Queue q0 = new Queue("F1", 1, -1, 1, 4, 1, 1.5, new double[][]{{0.8, 0.2}, {1, 2}});
-        Queue q1 = new Queue("F2", 3, 5, 0, 0, 5, 10, new double[][]{{0.3, 0.5}, {0, 2}});
-        Queue q2 = new Queue("F3", 2, 8, 0, 0, 10, 20, new double[][]{{0.7}, {1}});
-        Queue[] queues = {q0, q1, q2};
-        sim(queues);
+    public static void main(String[] args) throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
+        Config config = mapper.readValue(new File("model.yml"), Config.class);
+
+        Map<String, Queue> queues = config.generateQueues();
+        List<Object[]> arrivals = config.getArrivals();
+
+        sim(queues, arrivals);
     }
 
-    public static void sim(Queue[] queues) {
+    public static void sim(Map<String, Queue> queues, List<Object[]> arrivals) {
         double[] seeds = {1345, 5423, 7863, 4423, 10587};
         maxRand = 100000;
 
@@ -35,7 +43,7 @@ public class Main {
                 return 0;
             };
             PriorityQueue<Object[]> events = new PriorityQueue<>(comparator);
-            events.add(new Object[]{"A-0", 1.0});
+            events.addAll(arrivals);
 
             simulation:
             while (randomCount < maxRand) {
@@ -47,19 +55,19 @@ public class Main {
 
                 switch (eventType[0]) {
                     case "A":
-                        for (Queue q : queues) {
+                        for (Queue q : queues.values()) {
                             q.addTime(eventTime - time);
                         }
                         time = eventTime;
 
-                        int arrivalPos = Integer.parseInt(eventType[1]);
-                        Queue arrivalQueue = queues[arrivalPos];
+                        String arrivalKey = eventType[1];
+                        Queue arrivalQueue = queues.get(arrivalKey);
 
                         if (arrivalQueue.getSize() < arrivalQueue.getCapacity()) {
                             arrivalQueue.addSize(1);
                             if (arrivalQueue.getSize() <= arrivalQueue.getServers()) {
                                 try {
-                                    events.add(generateExitEvent(arrivalQueue, arrivalPos, time));
+                                    events.add(generateExitEvent(arrivalQueue, arrivalKey, time));
                                 } catch (Exception e) {
                                     break simulation;
                                 }
@@ -70,23 +78,23 @@ public class Main {
                             arrivalQueue.addLoss();
                         }
                         double[] arrival = arrivalQueue.getArrival();
-                        events.add(new Object[]{"A-" + arrivalPos, nextRandom(arrival[0], arrival[1]) + time});
+                        events.add(new Object[]{"A-" + arrivalKey, nextRandom(arrival[0], arrival[1]) + time});
                         randomCount++;
                         break;
                     case "E":
-                        for (Queue q : queues) {
+                        for (Queue q : queues.values()) {
                             q.addTime(eventTime - time);
                         }
                         time = eventTime;
 
-                        int exitPos = Integer.parseInt(eventType[1]);
-                        Queue exitQueue = queues[exitPos];
+                        String exitKey = eventType[1];
+                        Queue exitQueue = queues.get(exitKey);
 
                         exitQueue.addSize(-1);
 
                         if (exitQueue.getSize() >= exitQueue.getServers()) {
                             try {
-                                events.add(generateExitEvent(exitQueue, exitPos, time));
+                                events.add(generateExitEvent(exitQueue, exitKey, time));
                             } catch (Exception e) {
                                 break simulation;
                             }
@@ -94,21 +102,21 @@ public class Main {
                         }
                         break;
                     case "M":
-                        for (Queue q : queues) {
+                        for (Queue q : queues.values()) {
                             q.addTime(eventTime - time);
                         }
                         time = eventTime;
 
-                        int outPos = Integer.parseInt(eventType[1]);
-                        Queue outQueue = queues[outPos];
-                        int inPos = Integer.parseInt(eventType[2]);
-                        Queue inQueue = queues[inPos];
+                        String outKey = eventType[1];
+                        Queue outQueue = queues.get(outKey);
+                        String inKey = eventType[2];
+                        Queue inQueue = queues.get(inKey);
 
                         outQueue.addSize(-1);
 
                         if (outQueue.getSize() >= outQueue.getServers()) {
                             try {
-                                events.add(generateExitEvent(outQueue, outPos, time));
+                                events.add(generateExitEvent(outQueue, outKey, time));
                             } catch (Exception e) {
                                 break simulation;
                             }
@@ -120,7 +128,7 @@ public class Main {
                             inQueue.addSize(1);
                             if (inQueue.getSize() <= inQueue.getServers()) {
                                 try {
-                                    events.add(generateExitEvent(inQueue, inPos, time));
+                                    events.add(generateExitEvent(inQueue, inKey, time));
                                 } catch (Exception e) {
                                     break simulation;
                                 }
@@ -135,25 +143,25 @@ public class Main {
                 }
             }
 
-            for (Queue q : queues) {
+            for (Queue q : queues.values()) {
                 q.print();
             }
         }
 
     }
 
-    public static Object[] generateExitEvent(Queue queue, int queuePos, double time) throws Exception {
-        int dest = queue.firstRoute();
+    public static Object[] generateExitEvent(Queue queue, String queueName, double time) throws Exception {
+        String dest = queue.firstRoute();
         if (queue.hasRoutes()) {
             dest = queue.exit(nextRandom(0, 1));
             randomCount++;
             if (randomCount == maxRand) throw new Exception();
         }
         double[] exit = queue.getExit();
-        if (dest == -1) {
-            return new Object[]{"E-" + queuePos, nextRandom(exit[0], exit[1]) + time};
+        if (dest.equals("exit")) {
+            return new Object[]{"E-" + queueName, nextRandom(exit[0], exit[1]) + time};
         } else {
-            return new Object[]{"M-" + queuePos + "-" + dest, nextRandom(exit[0], exit[1]) + time};
+            return new Object[]{"M-" + queueName + "-" + dest, nextRandom(exit[0], exit[1]) + time};
         }
     }
 
