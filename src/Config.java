@@ -9,6 +9,7 @@ public class Config {
     public List<Route> routing = new LinkedList<>();
     public List<Long> seeds = new LinkedList<>();
     public int rndNumbersPerSeed = 100000;
+    public List<Double> rndNumbers = new LinkedList<>();
 
     public static class Queues {
         public int servers;
@@ -56,6 +57,10 @@ public class Config {
 
     public List<Long> getSeeds() {
         return seeds;
+    }
+
+    public List<Double> getRndNumbers() {
+        return rndNumbers;
     }
 
     public int getRndNumbersPerSeed() {

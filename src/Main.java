@@ -16,6 +16,8 @@ public class Main {
     private static final int m = 137921;
     private static long x;
     private static int randomCount, maxRand;
+    private static List<Double> rndNumbers;
+    private static boolean useRnd;
 
     public static void main(String[] args) throws IOException {
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -23,8 +25,16 @@ public class Main {
 
         Map<String, Queue> queues = config.generateQueues();
         List<Object[]> arrivals = config.getArrivals();
-        Long[] seeds = config.getSeeds().toArray(new Long[0]);
-        maxRand = config.getRndNumbersPerSeed();
+
+        Long[] seeds = {1L};
+        rndNumbers = config.getRndNumbers();
+        useRnd = rndNumbers.size() > 0;
+        if (useRnd) {
+            maxRand = rndNumbers.size();
+        } else {
+            seeds = config.getSeeds().toArray(new Long[0]);
+            maxRand = config.getRndNumbersPerSeed();
+        }
 
         sim(queues, arrivals, seeds);
     }
@@ -168,11 +178,8 @@ public class Main {
         }
     }
 
-    //static double[] r = {0.2176, 0.0103, 0.1109, 0.3456, 0.9910, 0.2323, 0.9211, 0.0322, 0.1211, 0.5131, 0.7208, 0.9172, 0.9922, 0.8324, 0.5011, 0.2931};
-    //static double[] r = {0.9921, 0.0004, 0.5534, 0.2761, 0.3398, 0.8963, 0.9023, 0.0132, 0.4569, 0.5121, 0.9208, 0.0171, 0.2299, 0.8545, 0.6001, 0.2921};
-
     public static double nextRandom(double A, double B) {
         x = (a * x + c) % m;
-        return (B - A) * ((double) x / m) + A;
+        return (B - A) * (useRnd ? rndNumbers.get(randomCount) : (double) x / m) + A;
     }
 }
