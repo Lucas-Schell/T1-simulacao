@@ -1,7 +1,7 @@
 arrivals:
   F1: 1.0
 
-rndNumbersPerSeed: 100000
+rndnumbersPerSeed: 100000
 
 seeds:
   - 1345
@@ -13,20 +13,20 @@ queues:
     capacity: -1
     minArrival: 1.0
     maxArrival: 4.0
-    minExit: 1.0
-    maxExit: 1.5
+    minService: 1.0
+    maxService: 1.5
   F2:
     servers: 3
     capacity: 5
-    minExit: 5.0
-    maxExit: 10.0
+    minService: 5.0
+    maxService: 10.0
   F3:
     servers: 2
     capacity: 8
-    minExit: 10.0
-    maxExit: 20.0
+    minService: 10.0
+    maxService: 20.0
 
-routing:
+network:
   - source: F1
     target: F2
     probability: 0.8

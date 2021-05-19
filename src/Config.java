@@ -6,18 +6,18 @@ import java.util.Map;
 public class Config {
     public Map<String, Double> arrivals = new HashMap<>();
     public Map<String, Queues> queues = new HashMap<>();
-    public List<Route> routing = new LinkedList<>();
+    public List<Route> network = new LinkedList<>();
     public List<Long> seeds = new LinkedList<>();
-    public int rndNumbersPerSeed = 100000;
-    public List<Double> rndNumbers = new LinkedList<>();
+    public int rndnumbersPerSeed = 100000;
+    public List<Double> rndnumbers = new LinkedList<>();
 
     public static class Queues {
         public int servers;
-        public int capacity;
-        public double minArrival = 0;
-        public double maxArrival = 0;
-        public double minExit;
-        public double maxExit;
+        public int capacity = -1;
+        public double minArrival;
+        public double maxArrival;
+        public double minService;
+        public double maxService;
         public List<String> target = new LinkedList<>();
         public List<Double> probability = new LinkedList<>();
     }
@@ -35,13 +35,13 @@ public class Config {
             String key = entry.getKey();
             Queues value = entry.getValue();
             queues.put(key, new Queue(key, value.servers, value.capacity, value.minArrival, value.maxArrival,
-                    value.minExit, value.maxExit, new Object[][]{value.probability.toArray(), value.target.toArray()}));
+                    value.minService, value.maxService, new Object[][]{value.probability.toArray(), value.target.toArray()}));
         }
         return queues;
     }
 
     private void generateRouting() {
-        for (Route r : routing) {
+        for (Route r : network) {
             queues.get(r.source).target.add(r.target);
             queues.get(r.source).probability.add(r.probability);
         }
@@ -59,11 +59,11 @@ public class Config {
         return seeds;
     }
 
-    public List<Double> getRndNumbers() {
-        return rndNumbers;
+    public List<Double> getRndnumbers() {
+        return rndnumbers;
     }
 
-    public int getRndNumbersPerSeed() {
-        return rndNumbersPerSeed;
+    public int getRndnumbersPerSeed() {
+        return rndnumbersPerSeed;
     }
 }

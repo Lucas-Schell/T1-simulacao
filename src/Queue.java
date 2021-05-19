@@ -38,7 +38,7 @@ public class Queue {
         }
 
         System.out.println("Loss: " + (getLoss() / media));
-        System.out.println("Total time: " + (getTime() / media) + "\n");
+        System.out.printf("Total time: %.4f\n", (getTime() / media));
     }
 
     public void addMedia(){

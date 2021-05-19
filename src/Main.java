@@ -1,11 +1,12 @@
 //Lucas Schell e Max Franke
 
 import java.io.File;
-import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
@@ -19,21 +20,35 @@ public class Main {
     private static List<Double> rndNumbers;
     private static boolean useRnd;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("run: java -jar simulator <model.yml>");
+            System.exit(0);
+        }
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-        Config config = mapper.readValue(new File("model.yml"), Config.class);
+        Config config = null;
+        try {
+            config = mapper.readValue(new File(args[0]), Config.class);
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found!");
+            System.exit(0);
+        } catch (Exception e) {
+            System.out.println("File is not correct!");
+            e.printStackTrace();
+            System.exit(0);
+        }
 
         Map<String, Queue> queues = config.generateQueues();
         List<Object[]> arrivals = config.getArrivals();
 
         Long[] seeds = {1L};
-        rndNumbers = config.getRndNumbers();
+        rndNumbers = config.getRndnumbers();
         useRnd = rndNumbers.size() > 0;
         if (useRnd) {
             maxRand = rndNumbers.size();
         } else {
             seeds = config.getSeeds().toArray(new Long[0]);
-            maxRand = config.getRndNumbersPerSeed();
+            maxRand = config.getRndnumbersPerSeed();
         }
 
         sim(queues, arrivals, seeds);
