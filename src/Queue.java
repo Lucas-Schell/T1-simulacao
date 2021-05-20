@@ -28,8 +28,9 @@ public class Queue {
     }
 
     private int totalSimulations = 0;
+
     public void print() {
-        System.out.println(name);
+        System.out.println("\n" + name);
         for (int i = 0; i < queueTime.size(); i++) {
             System.out.printf("%d\t%.4f\t%.2f%%\n", i, queueTime.get(i) / totalSimulations, (((queueTime.get(i) / totalSimulations) * 100) / (time / totalSimulations)));
         }
@@ -41,7 +42,7 @@ public class Queue {
         System.out.printf("Total time: %.4f\n", (getTime() / totalSimulations));
     }
 
-    public void addSimulacao(){ //zera as variaveis necessarias para outra simulacao e incrementa o contador de simulacoes
+    public void addSimulacao() { //zera as variaveis necessarias para outra simulacao e incrementa o contador de simulacoes
         size = 0;
         totalSimulations++;
     }
