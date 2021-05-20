@@ -175,8 +175,8 @@ public class Main {
                 }
             }
 
-            for (Queue q : queues.values()) { //informa as filas que a simulacao acabou
-                q.addMedia();
+            for (Queue q : queues.values()) { //informa as filas que uma simulacao acabou
+                q.addSimulacao();
             }
         }
 

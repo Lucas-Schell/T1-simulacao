@@ -41,7 +41,7 @@ public class Queue {
         System.out.printf("Total time: %.4f\n", (getTime() / totalSimulations));
     }
 
-    public void addMedia(){ //zera as variaveis necessarias para outra simulacao e incrementa o contador de simulacoes
+    public void addSimulacao(){ //zera as variaveis necessarias para outra simulacao e incrementa o contador de simulacoes
         size = 0;
         totalSimulations++;
     }
