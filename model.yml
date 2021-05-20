@@ -4,7 +4,7 @@ arrivals:
 rndnumbersPerSeed: 100000
 
 seeds:
-  - 1345654
+  - 13454
 
 queues:
   F1:
