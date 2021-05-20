@@ -11,9 +11,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class Main {
-    private static final int a = 36789;
-    private static final int c = 14168;
-    private static final int m = 137921;
+    private static final int a = 3672389;
+    private static final int c = 1443168;
+    private static final int m = 13237921;
     private static long x;
     private static int randomCount, maxRand;
     private static List<Double> rndNumbers;
