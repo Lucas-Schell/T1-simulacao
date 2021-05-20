@@ -28,7 +28,7 @@ public class Config {
         public double probability;
     }
 
-    public Map<String, Queue> generateQueues() {
+    public Map<String, Queue> generateQueues() { //cria um hashmap com as filas do arquivo
         generateRouting();
         Map<String, Queue> queues = new HashMap<>();
         for (Map.Entry<String, Queues> entry : this.queues.entrySet()) {
@@ -40,14 +40,14 @@ public class Config {
         return queues;
     }
 
-    private void generateRouting() {
+    private void generateRouting() { //adiciona os roteamentos nas filas
         for (Route r : network) {
             queues.get(r.source).target.add(r.target);
             queues.get(r.source).probability.add(r.probability);
         }
     }
 
-    public List<Object[]> getArrivals() {
+    public List<Object[]> getArrivals() { //gera uma lista de eventos de chegadas iniciais
         List<Object[]> list = new LinkedList<>();
         for (Map.Entry<String, Double> entry : this.arrivals.entrySet()) {
             list.add(new Object[]{new String[]{"A", entry.getKey()}, entry.getValue()});

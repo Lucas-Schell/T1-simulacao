@@ -27,42 +27,42 @@ public class Queue {
         queueTime = new ArrayList<>();
     }
 
-    private int media = 0;
+    private int totalSimulations = 0;
     public void print() {
         System.out.println(name);
         for (int i = 0; i < queueTime.size(); i++) {
-            System.out.printf("%d\t%.4f\t%.2f%%\n", i, queueTime.get(i) / media, (((queueTime.get(i) / media) * 100) / (time / media)));
+            System.out.printf("%d\t%.4f\t%.2f%%\n", i, queueTime.get(i) / totalSimulations, (((queueTime.get(i) / totalSimulations) * 100) / (time / totalSimulations)));
         }
         for (int i = queueTime.size(); i < capacity + 1; i++) {
             System.out.printf("%d\t%.4f\t%.2f%%\n", i, 0.0, 0.0);
         }
 
-        System.out.println("Loss: " + (getLoss() / media));
-        System.out.printf("Total time: %.4f\n", (getTime() / media));
+        System.out.println("Loss: " + (getLoss() / totalSimulations));
+        System.out.printf("Total time: %.4f\n", (getTime() / totalSimulations));
     }
 
-    public void addMedia(){
+    public void addMedia(){ //zera as variaveis necessarias para outra simulacao e incrementa o contador de simulacoes
         size = 0;
-        media++;
+        totalSimulations++;
     }
 
     public void addTime(double time) {
-        if (queueTime.size() <= size) {
+        if (queueTime.size() <= size) { //caso posicao do tamanho da fila nao existir na lista adiciona um elemento
             queueTime.add(0.0);
         }
-        queueTime.set(size, queueTime.get(size) + time);
+        queueTime.set(size, queueTime.get(size) + time); //contabiliza o tempo em que a fila permanece em determinada posicao
         this.time += time;
     }
 
-    public String exit(double route) {
+    public String exit(double route) { //escolhe qual roteamento seguir
         double count = 0.0;
-        for (int i = 0; i < routes[0].length; i++) {
-            count += (double) routes[0][i];
-            if (route < count) {
+        for (int i = 0; i < routes[0].length; i++) { //percorre probabilidades do roteamento
+            count += (double) routes[0][i]; //soma ao contador probabilidade do roteamento atual do for
+            if (route < count) { //caso o numero aleatorio seja menor que o contador retorna fila destino da posicao atual do for
                 return (String) routes[1][i];
             }
         }
-        return "exit";
+        return "exit"; //se a probabilidade nao foi encontrada retorna "exit"
     }
 
     public void addSize(int add) {
@@ -73,11 +73,11 @@ public class Queue {
         loss++;
     }
 
-    public boolean hasRoutes() {
+    public boolean hasRoutes() { //retorna se existe algum roteamento na fila e se esse roteamento nao tem 100% de probabilidade
         return routes[0].length > 0 && (double) routes[0][0] < 1.0;
     }
 
-    public String firstRoute() {
+    public String firstRoute() { //retorna o primeiro roteamento da lista ou "exit" caso nao tenha nenhum
         return routes[0].length > 0 ? (String) routes[1][0] : "exit";
     }
 
