@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 public class Main {
-
     private static final int a = 36789;
     private static final int c = 14168;
     private static final int m = 137921;
@@ -25,6 +24,7 @@ public class Main {
             System.out.println("run: java -jar simulator <model.yml>");
             System.exit(0);
         }
+
         ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
         Config config = null;
         try {
@@ -55,7 +55,6 @@ public class Main {
     }
 
     public static void sim(Map<String, Queue> queues, List<Object[]> arrivals, Long[] seeds) {
-
         for (Long seed : seeds) {
             x = seed;
             randomCount = 0;
@@ -75,7 +74,7 @@ public class Main {
                 Object[] event = events.poll();
 
                 assert event != null;
-                String[] eventType = event[0].toString().split("-");
+                String[] eventType = (String[]) event[0];
                 double eventTime = (double) event[1];
 
                 switch (eventType[0]) {
@@ -102,8 +101,9 @@ public class Main {
                         } else {
                             arrivalQueue.addLoss();
                         }
+
                         double[] arrival = arrivalQueue.getArrival();
-                        events.add(new Object[]{"A-" + arrivalKey, nextRandom(arrival[0], arrival[1]) + time});
+                        events.add(new Object[]{new String[]{"A", arrivalKey}, nextRandom(arrival[0], arrival[1]) + time});
                         randomCount++;
                         break;
                     case "E":
@@ -138,7 +138,6 @@ public class Main {
                         Queue inQueue = queues.get(inKey);
 
                         outQueue.addSize(-1);
-
                         if (outQueue.getSize() >= outQueue.getServers()) {
                             try {
                                 events.add(generateExitEvent(outQueue, outKey, time));
@@ -164,7 +163,7 @@ public class Main {
                         }
                         break;
                     default:
-                        break;
+                        break simulation;
                 }
             }
 
@@ -187,9 +186,9 @@ public class Main {
         }
         double[] exit = queue.getExit();
         if (dest.equals("exit")) {
-            return new Object[]{"E-" + queueName, nextRandom(exit[0], exit[1]) + time};
+            return new Object[]{new String[]{"E", queueName}, nextRandom(exit[0], exit[1]) + time};
         } else {
-            return new Object[]{"M-" + queueName + "-" + dest, nextRandom(exit[0], exit[1]) + time};
+            return new Object[]{new String[]{"M", queueName, dest}, nextRandom(exit[0], exit[1]) + time};
         }
     }
 

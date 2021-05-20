@@ -50,7 +50,7 @@ public class Config {
     public List<Object[]> getArrivals() {
         List<Object[]> list = new LinkedList<>();
         for (Map.Entry<String, Double> entry : this.arrivals.entrySet()) {
-            list.add(new Object[]{"A-" + entry.getKey(), entry.getValue()});
+            list.add(new Object[]{new String[]{"A", entry.getKey()}, entry.getValue()});
         }
         return list;
     }
